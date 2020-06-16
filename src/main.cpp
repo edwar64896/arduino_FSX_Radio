@@ -46,19 +46,19 @@ gspSwitch encoderBtn(10,btnEncoder);
 gspSwitch coBtn(11,btnFlip);
 gspSwitch modeCOM1(12,setModeCom1,1);
 gspSwitch modeCOM2(14,setModeCom2,1);
-gspSwitch modeNAV1(15,setModeNav1,1);
-gspSwitch modeNAV2(16,setModeNav2,1);
+gspSwitch modeNAV1(16,setModeNav1,1);
+gspSwitch modeNAV2(15,setModeNav2,1);
 gspSwitch modeADF(17,setModeAdf,1);
 gspSwitch modeDME(18,setModeDme,1);
 gspSwitch modeXPD(19,setModeXpd,1);
 
 gspSerialResponse srCom1("=A",7,fsrCom1);
-gspSerialResponse srCom2("=B",7,fsrCom2);
-gspSerialResponse srCom1sb("=C",7,fsrCom1sb);
+gspSerialResponse srCom1sb("=B",7,fsrCom1sb);
+gspSerialResponse srCom2("=C",7,fsrCom2);
 gspSerialResponse srCom2sb("=D",7,fsrCom2sb);
 gspSerialResponse srNav1("=E",6,fsrNav1);
-gspSerialResponse srNav2("=F",6,fsrNav2);
-gspSerialResponse srNav1sb("=G",6,fsrNav1sb);
+gspSerialResponse srNav1sb("=F",6,fsrNav1sb);
+gspSerialResponse srNav2("=G",6,fsrNav2);
 gspSerialResponse srNav2sb("=H",6,fsrNav2sb);
 gspSerialResponse srAdf("=I",6,fsrAdf);
 gspSerialResponse srXpd("=J",4,fsrXpd);
@@ -97,6 +97,8 @@ void setup()
   lcd.clear();
 
   mark = 10;
+
+  gspQuad::startCheckAll();
 }
 
 void LCDPrint(String element, int x, int y) {
@@ -111,7 +113,12 @@ void redrawNMark() {
     LCDPrint("                ", 0, 1);
     if (nmark > 0)
       LCDPrint("-", nmark + 10 , 1);
-  } else {
+  } else if (
+    modeCOM1.getState() == gspSwitch::On ||
+    modeCOM2.getState() == gspSwitch::On ||
+    modeNAV1.getState() == gspSwitch::On ||
+    modeNAV2.getState() == gspSwitch::On )
+  {
     switch (nmark) {
       case 0:
         LCDPrint(".", 12, 1);
@@ -157,9 +164,9 @@ void btnFlip() {
 
 void setModeCom1() {
   if (activeMode != 12) {
-    LCDPrint("Com.1     ", 0, 0);
+    LCDPrint("Com.1           ", 0, 0);
     LCDPrint(srCom1.getLastResponse(), 9, 0);
-    LCDPrint("  s/b     ", 0, 1);
+    LCDPrint("  s/b           ", 0, 1);
     LCDPrint(srCom1sb.getLastResponse(), 9, 1);
     nmark = 0;
     redrawNMark();
@@ -169,9 +176,9 @@ void setModeCom1() {
 
 void setModeCom2() {
   if (activeMode != 14) {
-    LCDPrint("Com.2     ", 0, 0);
+    LCDPrint("Com.2           ", 0, 0);
     LCDPrint(srCom2.getLastResponse(), 9, 0);
-    LCDPrint("  s/b     ", 0, 1);
+    LCDPrint("  s/b           ", 0, 1);
     LCDPrint(srCom2sb.getLastResponse(), 9, 1);
     nmark = 0;
     redrawNMark();    
@@ -181,9 +188,9 @@ void setModeCom2() {
 
 void setModeNav1() {
   if (activeMode != 15) {
-    LCDPrint("Nav.1     ", 0, 0);
+    LCDPrint("Nav.1           ", 0, 0);
     LCDPrint(srNav1.getLastResponse(), 9, 0);
-    LCDPrint("  s/b     ", 0, 1);
+    LCDPrint("  s/b           ", 0, 1);
     LCDPrint(srNav1sb.getLastResponse(), 9, 1);
     nmark = 0;
     redrawNMark();
@@ -193,9 +200,9 @@ void setModeNav1() {
 
 void setModeNav2() {
   if (activeMode != 16) {
-    LCDPrint("Nav.2     ", 0, 0);
+    LCDPrint("Nav.2           ", 0, 0);
     LCDPrint(srNav2.getLastResponse(), 9, 0);
-    LCDPrint("  s/b     ", 0, 1);
+    LCDPrint("  s/b           ", 0, 1);
     LCDPrint(srNav2sb.getLastResponse(), 9, 1);
     nmark = 0;
     redrawNMark();
@@ -206,7 +213,7 @@ void setModeNav2() {
 void setModeAdf() {
   if (activeMode != 17) {
     LCDPrint("ADF       ", 0, 0);
-    LCDPrint(srAdf.getLastResponse() + "  ", 10, 0);
+    LCDPrint(String(srAdf.getLastResponse()) + "  ", 10, 0);
     nmark = 0;
     redrawNMark();
     activeMode = 17;
@@ -215,9 +222,9 @@ void setModeAdf() {
 
 void setModeDme() {
   if (activeMode != 18) {
-    LCDPrint("DME1      ", 0, 0);
+    LCDPrint("DME1            ", 0, 0);
     LCDPrint(srDme1.getLastResponse(), 9, 0);
-    LCDPrint("DME2      ", 0, 1);
+    LCDPrint("DME2            ", 0, 1);
     LCDPrint(srDme2.getLastResponse(), 9, 1);
     activeMode = 18;
   }
@@ -226,7 +233,7 @@ void setModeDme() {
 void setModeXpd() {
   if (activeMode != 19) {
     LCDPrint("Xponder     ", 0, 0);
-    LCDPrint(srXpd.getLastResponse() + "    ", 11, 0);
+    LCDPrint(String(srXpd.getLastResponse()) + "    ", 11, 0);
     nmark = 0;
     redrawNMark();
     activeMode = 19;
@@ -454,6 +461,6 @@ void encHigher(int _dif) {
 
 void loop() {
   gspSwitch::checkAll();
-  gspQuad::checkAll();
+  //gspQuad::checkAll();
   gspSerialResponse::checkAll();
 }
